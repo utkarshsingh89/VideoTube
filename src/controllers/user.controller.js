@@ -233,38 +233,168 @@ const edituserdetails=asyncHandler(async(req,res)=>{
     if(!username&&!email&&!Fullname){
         throw new apierror(400,"invalid request");
     }
+    const updates={}
+
+
     if(username){
-        const existinguser=await User.findOne({username});
+        const existinguser=await User.findOne({username})
         if(existinguser&&existinguser._id.toString()!==req.user._id.toString()){
-            throw new apierror(409,"username is already exists")
+            throw new apierror(400,"username already exists")
         }
-        else{
-            req.user.username=username;
-            await req.user.save();
+        updates.username=username;
+    }
+    if(email){
+        const existinguser=await User.findOne({email})
+        if(existinguser&&existinguser._id.toString()!==req.user._id.toString()){
+            throw new apierror(400,"email already exists")
         }
+        updates.email=email;
     }
     if(Fullname){
         
+        updates.Fullname=Fullname;
     }
+    const updateduser=await User.findByIdAndUpdate(
+        req.user._id,
+        {$set: updates},
+        {new:true}
+    ).select("-password")
+    res.status(200).json(
+        new apiresponse(200,{updateduser},"profile updated successfully")
+    )
+    
+})
+
+const avtarupdation=asyncHandler(async(req,res)=>{
+    
+    if(!req.file){
+        throw new apierror(401,"Avatar file is required")
+    }
+    const avatarpath=await uploadToCloudinary(req.file.path)
+    if(!avatarpath.url){
+        throw new apierror(401,"api error in cloudnary")
+    }
+    const avatarupdate=await User.findByIdAndUpdate(req.user._id,{$set:{
+        avtar:avatarpath.url
+    }},{new:true}).select("-password")
+
+    res.status(200).json(
+        200,
+        {avatarupdate},"avatar update successfully"
+    )
+
+
+})
+const coverupdation=asyncHandler(async(req,res)=>{
+    
+    if(!req.file){
+        throw new apierror(401,"cover file is required")
+    }
+    const coverpath=await uploadToCloudinary(req.file.path)
+    if(!coverpath.url){
+        throw new apierror(401,"api error in cloudnary")
+    }
+    const coverupdate=await User.findByIdAndUpdate(req.user._id,{$set:{
+        cover:coverpath.url
+    }},{new:true}).select("-password")
+
+    res.status(200).json(
+        200,
+        {coverupdate},"cover update successfully"
+    )
+
+
 })
 
 
 
 const forgotpassword=asyncHandler(async(req,res)=>{
-    const {username,email}=req.body
-    if(!(username||email)){
-        throw new apierror(401,"username amd email not found")
+    const {email}=req.body
+    if(!email){
+        throw new apierror(401,"email not found")
+    } 
+})
+
+//get user channel profile
+
+const getuserchanneprofile=asyncHandler(async(req,res)=>{
+    const {username}=req.params
+    if(!username){
+        throw new apierror(400,"username is missing")
     }
-    
+    const channel=await User.aggregate([
+        {
+            $match:{
+                username:username.toLowerCase()
+            }
+        },
+        {
+        
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id",
+                foreignField:"channel",
+                as:"Subscriber"
+            }
+        },
+        {
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id",
+                foreignField:"subscriber",
+                as:"SubscribedTo"
+            }
+        },
+        {
+            $addFields:{
+                subscribercount:{
+                    $size:"$Subscriber"
+                },
+                subscriberTocount:{
+                    $size:"$SubscribedTo"
+                },
+                isSubscribed:{
+                    $cond:{
+                        if:{$in:[req.user._id,"$Subscriber.subscriber"]},
+                        then:true,
+                        else:false
+                    }
+                }
+            }
+
+        },
+        {
+            $project:{
+                Fullname:1,
+                username:1,
+                isSubscribed:1,
+                subscriberTocount:1,
+                subscribercount:1,
+                avtar:1,
+                cover:1
+            }
+        }
+    ])
+
+    if(!channel?.length){
+        throw new apierror(404,"channel doesnot exists")
+    }
+    return res.status(200).json(
+        new apiresponse(200,channel[0],"user channel fetched successfully")
+    )
 })
 
 
 
 export { 
     registeruser,
-     loginuser,
-      logoutuser,
-       refreshaccesstoken,
-        changepassword,
-         getcurrentuser
-        }; 
+    loginuser,
+    logoutuser,
+    refreshaccesstoken,
+    changepassword,
+    getcurrentuser,
+    edituserdetails,
+    avtarupdation,
+    coverupdation,
+    getuserchanneprofile
+}; 
