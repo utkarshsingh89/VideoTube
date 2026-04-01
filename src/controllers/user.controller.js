@@ -136,10 +136,12 @@ const loginuser=asyncHandler(async(req,res)=>{
 //logout user
 
 const logoutuser=asyncHandler(async(req,res)=>{
-    User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{refreshToken:""}
+            $unset:{
+                refreshToken:1
+            }
         }  ,
         {
             new:true,
