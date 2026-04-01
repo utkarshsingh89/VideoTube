@@ -4,7 +4,9 @@ import { asyncHandler } from "../utils/asynchandler.js";
 import{uploadToCloudinary} from "../utils/cloudinary.js";
 import { apiresponse } from "../utils/apiresponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
+//generate access and refresh token
 
 const generateaccessandrefreshtoken=async(userid)=>{
     
@@ -25,6 +27,7 @@ const generateaccessandrefreshtoken=async(userid)=>{
     }
 }
 
+//register user page
 
 const registeruser=asyncHandler(async(req,res)=>{
    const{username,email,password,Fullname}=req.body;
@@ -82,6 +85,7 @@ return res.status(201).json({
 })
 
 })
+///login user
 
 const loginuser=asyncHandler(async(req,res)=>{
     console.log(req.body);
@@ -150,6 +154,11 @@ const logoutuser=asyncHandler(async(req,res)=>{
     )
     
 })
+
+// generate acceesss token 
+
+
+
 const refreshaccesstoken=asyncHandler(async(req,res)=>{
         //access refreshtoken
         //decode refresah token
@@ -195,6 +204,7 @@ const refreshaccesstoken=asyncHandler(async(req,res)=>{
 })
 
 
+// change passsword or update
 const changepassword=asyncHandler(async(req,res)=>{
     //old password,new password
     const {oldpassword,newpassword}=req.body
@@ -223,11 +233,14 @@ const changepassword=asyncHandler(async(req,res)=>{
         new apiresponse(200,"Password changed successfully",null)
     )
 })
+
+//get current user
 const getcurrentuser=asyncHandler(async(req,res)=>{
     return res.status(200).json(
         200,req.user,"Current user fetched successfully"
     )
 })
+//edit  user details
 const edituserdetails=asyncHandler(async(req,res)=>{
     const {username,email,Fullname}=req.body;
     if(!username&&!email&&!Fullname){
@@ -265,6 +278,8 @@ const edituserdetails=asyncHandler(async(req,res)=>{
     
 })
 
+// avatar updation
+
 const avtarupdation=asyncHandler(async(req,res)=>{
     
     if(!req.file){
@@ -285,6 +300,8 @@ const avtarupdation=asyncHandler(async(req,res)=>{
 
 
 })
+
+//cover updation
 const coverupdation=asyncHandler(async(req,res)=>{
     
     if(!req.file){
@@ -306,7 +323,7 @@ const coverupdation=asyncHandler(async(req,res)=>{
 
 })
 
-
+//forgot password
 
 const forgotpassword=asyncHandler(async(req,res)=>{
     const {email}=req.body
@@ -385,6 +402,62 @@ const getuserchanneprofile=asyncHandler(async(req,res)=>{
 })
 
 
+//get watchHistory
+const getWatchHistory=asyncHandler(async(req,res)=>{
+    const user=await User.aggregate([
+        {
+            $match:{
+                _id:new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup:{
+                from:"videos",
+                localField:"watchHistory",
+                foreignField:"_id",
+                as:"watchHistory",
+                pipeline:[
+                    {
+                        $lookup:{
+                            from:"users",
+                            localField:"owner",
+                            foreignField:"_id",
+                            as:"owner",
+                            pipeline:[
+                                {
+                                    $project:{
+                                        username:1,
+                                        Fullname:1,
+                                        avtar:1,
+                                        cover:1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields:{
+                            owner:{
+                                $first:"$owner"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ])
+
+    if(!user?.length){
+        throw new apierror(404,"watch History Not Found")
+    }
+    return res.status(200).json(
+        new apiresponse(200,user[0].watchHistory,"watch history Fetched Successfully")
+    )
+})
+
+
+
+
 
 export { 
     registeruser,
@@ -396,5 +469,6 @@ export {
     edituserdetails,
     avtarupdation,
     coverupdation,
-    getuserchanneprofile
+    getuserchanneprofile,
+    getWatchHistory
 }; 
