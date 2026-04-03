@@ -1,10 +1,15 @@
 import {Router} from "express";
-import { createvideo, deletevideo, getallvideos, getvideo, updatevideo, likevideo, dislikevideo, addcomment, deletecomment, publishAVideo } from "../controllers/video.controller.js";
+import { getAllVideos,
+    publishAVideo,
+    getVideoById,
+    updateVideo,
+    deleteVideo,
+    togglePublishStatus } from "../controllers/video.controller.js";
 import { authenticateJWT } from "../middileware/auth.middileware.js";
 import { upload } from "../middileware/multer.middilware.js";
 const router=Router();
 
-router.route("/").get(authenticateJWT,getallvideos)
+router.route("/").get(authenticateJWT,getAllVideos)
 .post(authenticateJWT,upload
     .fields([
         {
