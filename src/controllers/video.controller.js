@@ -3,7 +3,7 @@ import mongoose, {isValidObjectId} from "mongoose"
 import { apierror } from "../utils/apierror.js"
 import { apiresponse } from "../utils/apiresponse.js"
 import { asyncHandler } from "../utils/asynchandler.js"
-import { uploadToCloudinary } from "../utils/cloudinary.js"
+import { uploadToCloudinary, deleteimagefromcloudnary, deletevideofromcloudnary } from "../utils/cloudinary.js"
 import { Video } from "../models/video.model.js"
 import { User } from "../models/user.model.js"
 
@@ -27,7 +27,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
         matchstage.owner=new mongoose.Types.ObjectId(userId);
 
     }
-    const getvideo=await Video.aggregate([
+    const getvideo= Video.aggregate([
         {
             $match:{
                 ...matchstage
@@ -79,10 +79,12 @@ const publishAVideo = asyncHandler(async (req, res) => {
     if(!videoo?.url||!thumbnaill?.url){
         throw new apierror(401,"Upload to cloudnaryis failed");
     }
-    const duration_video=Math.round(videoFile.duration||0);
+    const duration_video=Math.round(videoo.duration||0);
     const video=await Video.create({
         videoFile:videoo?.url,
         thumbnail:thumbnaill?.url,
+        publicID:videoo.public_id,
+        thumbnailPublicID:thumbnaill.public_id,
         title,
         description,
         owner:user._id,
@@ -152,7 +154,7 @@ const updateVideo = asyncHandler(async (req, res) => {
         throw new apierror(400,"title or description is required");
     }
     if(!videoId||!mongoose.Types.ObjectId.isValid(videoId)){
-        throw new apierror(404,"Video not found");
+        throw new apierror(401,"invalid video id");
     }
     if(!req.user?._id){
         throw new apierror(401,"unauthorized");
@@ -164,16 +166,18 @@ const updateVideo = asyncHandler(async (req, res) => {
     if(req.user._id.toString()!==video.owner.toString()){
         throw new apierror(403,"you are not authorized");
     }
-    const thumbnailurl=video.thumbnail;
+    let thumbnailurl=video.thumbnail;
     if(!req.file){
         throw new apierror(401,"thumbnail required")
     }
     thumbnailurl=await uploadToCloudinary(req.file.path);
+    await deleteimagefromcloudnary(video.thumbnailPublicID);
     const updatedvideo=await Video.findByIdAndUpdate(videoId,{
         $set:{
             title:title,
             description:description,
-            thumbnail:thumbnailurl?.url
+            thumbnail:thumbnailurl?.url,
+            thumbnailPublicID:thumbnailurl.public_id
         }
     },{
         new:true
@@ -181,7 +185,7 @@ const updateVideo = asyncHandler(async (req, res) => {
     ).select("title description thumbnail")
 
     return res.status(200).json(
-        new apiresponse(200,updateVideo,"video updated successfully")
+        new apiresponse(200,updatedvideo,"video updated successfully")
     )
 
 })
@@ -189,10 +193,46 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
+    //check video
+    if(!videoId||!mongoose.Types.ObjectId.isValid(videoId)){
+        throw new apierror(401,"invalid video id");
+    }
+    
+    //check ownership
+    const video=await Video.findById(videoId);
+    if(!video){
+        throw new apierror(404,"VIDEO NOT FOUND");
+    }
+    if(video.owner.toString()!==req.user._id.toString()){
+        throw new apierror(403,"you are not authorized to delete this video");
+    }
+    await deletevideofromcloudnary(video.publicID);
+    await deleteimagefromcloudnary(video.thumbnailPublicID);
+    await video.deleteOne();
+    return res.status(200).json(
+        new apiresponse(200,null,"video deleted successfully")
+    )
+
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    if(!videoId||!mongoose.Types.ObjectId.isValid(videoId)){
+        throw new apierror(401,"invalid video id");
+    }
+    if (video.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "Unauthorized");
+}
+    const video=await Video.findById(videoId);
+    if(!video){
+        throw new apierror(404,"video not found");
+    }
+    video.isPublished = !video.isPublished;
+    await video.save();
+    return res.status(200).json(
+        new apiresponse(200,video,"video publish status toggled successfully")
+    )
+
 })
 
 export {

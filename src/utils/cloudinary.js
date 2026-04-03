@@ -27,4 +27,33 @@ const uploadToCloudinary=async(localpath)=>{
         throw error;
     }
 }
-export {uploadToCloudinary};
+
+const deleteimagefromcloudnary=async(publiID)=>{
+    try {
+        if(!publiID) return "failed";
+        const response=await cloudinary.uploader.destroy(publiID,{
+            resource_type:"image"
+        })
+        return response;
+
+        
+    } catch (error) {
+        console.error("cloud image delete failed:",error);
+        
+    }
+}
+const deletevideofromcloudnary=async(publiID)=>{
+    try {
+        if(!publiID) return "failed";
+        const response=await cloudinary.uploader.destroy(publiID,{
+            resource_type:"video"
+        })
+        return response;
+
+        
+    } catch (error) {
+        console.error("cloud video delete failed:",error);
+        
+    }
+}
+export {uploadToCloudinary,deleteimagefromcloudnary,deletevideofromcloudnary};
