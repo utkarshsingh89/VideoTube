@@ -26,5 +26,5 @@ router.route("/update-account").patch(authenticateJWT,edituserdetails);
 router.route("/update-avatar").patch(authenticateJWT,upload.single("avtar"),avtarupdation);
 router.route("/update-cover").patch(authenticateJWT,upload.single("cover"),coverupdation);
 router.route("/C/:username").get(authenticateJWT,getuserchanneprofile);
-router.route("history").get(authenticateJWT,getWatchHistory);
+router.route("/history").get(authenticateJWT,getWatchHistory);
 export default router;

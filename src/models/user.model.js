@@ -31,6 +31,14 @@ const UserSchema=new Schema(
             type:String,
             required:true,
         },
+        avtarPublicID:{
+            type:String,
+            required:true,
+        },
+        coverPublicID:{
+            type:String,
+        },
+
         cover:{
             type:String,
             

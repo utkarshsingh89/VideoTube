@@ -1,7 +1,7 @@
 import { User } from "../models/user.model.js";
 import { apierror } from "../utils/apierror.js";
 import { asyncHandler } from "../utils/asynchandler.js";
-import{uploadToCloudinary} from "../utils/cloudinary.js";
+import{uploadToCloudinary,deleteimagefromcloudnary} from "../utils/cloudinary.js";
 import { apiresponse } from "../utils/apiresponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -31,7 +31,7 @@ const generateaccessandrefreshtoken=async(userid)=>{
 
 const registeruser=asyncHandler(async(req,res)=>{
    const{username,email,password,Fullname}=req.body;
-   console.log("email:",email);
+  
    if(!username || !email || !password || !Fullname){
     throw  new apierror(400,"All fields are required")
    }
@@ -70,6 +70,8 @@ const registeruser=asyncHandler(async(req,res)=>{
         avtar:avtar?.url,
         
         cover:cover?.url||"",
+        coverPublicID:cover?.public_id||"",
+        avtarPublicID:avtar.public_id,
     })
   
     
@@ -239,7 +241,7 @@ const changepassword=asyncHandler(async(req,res)=>{
 //get current user
 const getcurrentuser=asyncHandler(async(req,res)=>{
     return res.status(200).json(
-        200,req.user,"Current user fetched successfully"
+        new apiresponse(200,req.user,"current user fetched successfully")
     )
 })
 //edit  user details
@@ -283,11 +285,13 @@ const edituserdetails=asyncHandler(async(req,res)=>{
 // avatar updation
 
 const avtarupdation=asyncHandler(async(req,res)=>{
+    console.log("req.file:", req.file);
     
     if(!req.file){
         throw new apierror(401,"Avatar file is required")
     }
-    const avatarpath=await uploadToCloudinary(req.file.path)
+    const avatarpath=await uploadToCloudinary(req.file.path);
+    await deleteimagefromcloudnary(req.user.avtarPublicID);
     if(!avatarpath.url){
         throw new apierror(401,"api error in cloudnary")
     }
@@ -296,8 +300,7 @@ const avtarupdation=asyncHandler(async(req,res)=>{
     }},{new:true}).select("-password")
 
     res.status(200).json(
-        200,
-        {avatarupdate},"avatar update successfully"
+       new apiresponse(200,{avatarupdate},"avatar update successfully")
     )
 
 
@@ -309,7 +312,8 @@ const coverupdation=asyncHandler(async(req,res)=>{
     if(!req.file){
         throw new apierror(401,"cover file is required")
     }
-    const coverpath=await uploadToCloudinary(req.file.path)
+    const coverpath=await uploadToCloudinary(req.file.path);
+    await deleteimagefromcloudnary(req.user.coverPublicID);
     if(!coverpath.url){
         throw new apierror(401,"api error in cloudnary")
     }
@@ -318,8 +322,7 @@ const coverupdation=asyncHandler(async(req,res)=>{
     }},{new:true}).select("-password")
 
     res.status(200).json(
-        200,
-        {coverupdate},"cover update successfully"
+        new apiresponse(200,{coverupdate},"cover update successfully")
     )
 
 
