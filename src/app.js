@@ -27,6 +27,9 @@ app.use("/users",userRouter);
 import videoRouter from "./route/video.route.js";
 app.use("/videos",videoRouter);
 
+import playlistRoter from "./route/playlist.routes.js";
+app.use("/playlists",playlistRoter);
+
 
 
 export {app};
