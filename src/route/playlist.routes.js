@@ -7,14 +7,14 @@ import {
     getUserPlaylists,
     removeVideoFromPlaylist,
     updatePlaylist,
-} from "../controllers/playlist.controllers.js"
+} from "../controllers/playlist.controller.js"
 import { authenticateJWT } from '../middileware/auth.middileware.js';
 
 const router = Router();
 
 router.use(authenticateJWT); // Apply authenticateJWT middleware to all routes in this file
 
-router.route("/").post(verifyJWT, createPlaylist)
+router.route("/").post(authenticateJWT, createPlaylist)
 
 router
     .route("/:playlistId")

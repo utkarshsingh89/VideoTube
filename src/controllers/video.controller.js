@@ -14,8 +14,8 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
     const Page=parseInt(page);
     const Limit=parseInt(limit);
-    if(!userId|| !mongoose.Types.ObjectId.isValid(userId)){
-        throw new apierror(400,"user id is not valid!!");
+    if(userId && !mongoose.Types.ObjectId.isValid(userId)){
+        throw new apierror(4000,"user id is not valid!!");
     }
     const matchstage={};
     if(query){
@@ -68,7 +68,15 @@ const publishAVideo = asyncHandler(async (req, res) => {
     if(!title || !description){
         throw new apierror(400,"Title and description are required!!")
     }
-    const videolocalpath=req.files.videoFile[0].path;
+    console.log(req.files);
+    console.log(req.files.videoFile);
+    
+    
+    
+    if (!req.files || !req.files.video || !req.files.thumbnail) {
+        throw new apierror(400, "Video file and thumbnail are required");
+    }
+    const videolocalpath=req.files.video[0].path;
     const thumbnaillocalpath=req.files.thumbnail[0].path;
     if(!videolocalpath||!thumbnaillocalpath){
         throw new apierror(400,"video and thumbnail is required")
