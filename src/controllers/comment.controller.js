@@ -141,4 +141,5 @@ const getComment=asyncHandler(async(req,res)=>{
 
 
 })
+export {addComment,updateComment,deleteComment,getComment};
 
