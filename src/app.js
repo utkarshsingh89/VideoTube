@@ -19,7 +19,7 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 
-//roter import
+//router import
 import userRouter from "./route/user.routes.js";
 app.use("/users",userRouter);
 
@@ -27,8 +27,26 @@ app.use("/users",userRouter);
 import videoRouter from "./route/video.route.js";
 app.use("/videos",videoRouter);
 
-import playlistRoter from "./route/playlist.routes.js";
-app.use("/playlists",playlistRoter);
+import playlistRouter from "./route/playlist.routes.js";
+app.use("/playlists",playlistRouter);
+
+import dashboardRouter from "./route/dashboard.rotes.js";
+app.use("/dashboard",dashboardRouter);
+
+import commentRouter from "./route/comment.routes.js";
+app.use("/comments",commentRouter);
+
+import subscriptionRouter from "./route/subscription.routes.js";
+app.use("/subscriptions",subscriptionRouter);
+
+import tweetRouter from "./route/tweet.routes.js";
+app.use("/tweets",tweetRouter);
+
+import likeRouter from "./route/like.routes.js";
+app.use("/likes",likeRouter);
+
+import healthCheckRouter from "./route/healthcheck.rotes.js";
+app.use("/healthcheck",healthCheckRouter);
 
 
 
