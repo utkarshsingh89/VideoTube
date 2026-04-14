@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 import {Video} from "../models/video.model.js"
 import {Subscription} from "../models/subscription.model.js"
-import {Like} from "../models/like.model.js"
+import {Like} from "../models/likes.model.js";
 import { apierror } from "../utils/apierror.js";
 import { apiresponse } from "../utils/apiresponse.js";
 import { asyncHandler } from "../utils/asynchandler.js";

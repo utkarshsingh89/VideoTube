@@ -109,8 +109,11 @@ const publishAVideo = asyncHandler(async (req, res) => {
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: get video by id
+    if(!videoId){
+        throw new apierror(40454,"Video not found");
+    }
     if(!videoId||!mongoose.Types.ObjectId.isValid(videoId)){
-        throw new apierror(404,"Video not found");
+        throw new apierror(4044,"Video not found");
     }
     await Video.findByIdAndUpdate(videoId, {
     $inc: { views: 1 },
@@ -155,7 +158,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
+    const { videoId } = req.params;
     //TODO: update video details like title, description, thumbnail
     const {title,description}=req.body;
     if(!title&&!description){
@@ -228,13 +231,14 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     if(!videoId||!mongoose.Types.ObjectId.isValid(videoId)){
         throw new apierror(401,"invalid video id");
     }
-    if (video.owner.toString() !== req.user._id.toString()) {
-    throw new ApiError(403, "Unauthorized");
-}
+    
     const video=await Video.findById(videoId);
     if(!video){
         throw new apierror(404,"video not found");
     }
+    if (video.owner.toString() !== req.user._id.toString()) {
+    throw new apierror(403, "Unauthorized");
+}
     video.isPublished = !video.isPublished;
     await video.save();
     return res.status(200).json(

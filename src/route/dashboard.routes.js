@@ -3,7 +3,7 @@ import {
     getChannelStats, 
     getChannelVideos
 } from '../controllers/dashboard.controller.js';
-import {authenticateJWT} from '../middlewares/auth.middleware.js';
+import {authenticateJWT} from '../middileware/auth.middileware.js';
 const router=Router();
 router.use(authenticateJWT);
 router.route("/stats").get(getChannelStats);

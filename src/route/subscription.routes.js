@@ -4,7 +4,7 @@ import {
     getUserChannelSubscribers,
     toggleSubscription,
 } from "../controllers/subscription.controller.js"
-import {authenticateJWT} from "../middlewares/auth.middleware.js";
+import {authenticateJWT} from "../middileware/auth.middileware.js";
 
 const router = Router();
 router.use(authenticateJWT); // Apply authenticateJWT middleware to all routes in this file

@@ -21,12 +21,12 @@ router.route("/").get(authenticateJWT,getAllVideos)
             maxCount:1
         }
     ]),publishAVideo);
-router.route("/:videoid").get(authenticateJWT,getVideoById)
+router.route("/:videoId").get(authenticateJWT,getVideoById)
 .patch(authenticateJWT,upload.single("thumbnail"),updateVideo)
 .delete(authenticateJWT,deleteVideo);
 
 
-router.route("/toggle/publish/:videoid").patch(authenticateJWT,togglePublishStatus);
+router.route("/toggle/publish/:videoId").patch(authenticateJWT,togglePublishStatus);
 
 
 export default router;

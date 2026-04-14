@@ -42,7 +42,7 @@ app.use("/subscriptions",subscriptionRouter);
 import tweetRouter from "./route/tweet.routes.js";
 app.use("/tweets",tweetRouter);
 
-import likeRouter from "./route/like.routes.js";
+import likeRouter from "./route/likes.routes.js";
 app.use("/likes",likeRouter);
 
 import healthCheckRouter from "./route/healthcheck.routes.js";

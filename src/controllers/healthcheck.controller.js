@@ -7,4 +7,4 @@ const healthcheck=asyncHandler(async(req,res)=>{
         new apiresponse(200,"OK")
     );
 })
-export {healthcheck};
+export { healthcheck };

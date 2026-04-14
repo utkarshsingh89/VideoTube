@@ -4,7 +4,7 @@ import {
     toggleTweetLike,
     toggleVideoLike,
     getLikedVideos } 
-    from "../controllers/likes.controller";
+    from "../controllers/likes.controller.js";
 import { authenticateJWT } from "../middileware/auth.middileware.js";
 
 
