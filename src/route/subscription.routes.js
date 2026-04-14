@@ -5,15 +5,16 @@ import {
     toggleSubscription,
 } from "../controllers/subscription.controller.js"
 import {authenticateJWT} from "../middileware/auth.middileware.js";
+import { get } from 'mongoose';
 
 const router = Router();
 router.use(authenticateJWT); // Apply authenticateJWT middleware to all routes in this file
 
 router
     .route("/c/:channelId")
-    .get(getSubscribedChannels)
+    .get(getUserChannelSubscribers)
     .post(toggleSubscription);
 
-router.route("/u/:subscriberId").get(getUserChannelSubscribers);
+router.route("/u/:subscriberId").get(getSubscribedChannels);
 
 export default router

@@ -113,17 +113,17 @@ const getChannelVideos = asyncHandler(async (req, res) => {
             createdAt:-1
         }
       },
-      {
-        $addFields:{
-            views:{
-                $cond:{
-                    if:{$isArray:"$views"},
-                    then:{$size:"$views"},
-                    else:{$ifnull:["$views",0]}
-                }
-            }
-        }
-      },
+    //   {
+    //     $addFields:{
+    //         views:{
+    //             $cond:{
+    //                 if:{$isArray:"$views"},
+    //                 then:{$size:"$views"},
+    //                 else:{$ifnull:["$views",0]}
+    //             }
+    //         }
+    //     }
+    //   },
       {
         $project:{
             thumbnail:1,
@@ -134,7 +134,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
       }
     ])
     return res.status(200).json(
-        new apiresponse(200,getvideo,"video fetched successfully")
+        new apiresponse(200,getvideo[0],"video fetched successfully")
     );
 })
 

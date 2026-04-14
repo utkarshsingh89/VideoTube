@@ -63,11 +63,11 @@ const getPlaylistById = asyncHandler(async (req, res) => {
 })
 
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
-    const {playlistId, videoId} = req.params
+    const {videoId, playlistId} = req.params
     if(!playlistId||!mongoose.Types.ObjectId.isValid(playlistId)){
         throw new apierror(401,"Playlist id is wrong");
     }
-    if(!videoId||mongoose.Types.ObjectId.isValid(videoId)){
+    if(!videoId||!mongoose.Types.ObjectId.isValid(videoId)){
         throw new apierror(402,"if you dont have video than you cant add in playlsit");
     }
     const playlist=await Playlist.findByIdAndUpdate(
@@ -86,7 +86,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     }
     return res
     .status(200)
-    .json(new apiresponse(200,))
+    .json(new apiresponse(200,playlist,"video added to playlist successfully"))
 })
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {

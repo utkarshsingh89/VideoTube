@@ -30,14 +30,15 @@ const addComment=asyncHandler(async(req,res)=>{
 //update comment
 const updateComment=asyncHandler(async(req,res)=>{
     const {content}=req.body;
-    const {CommentId}=req.params;
+    const {commentId}=req.params;
     if(!content){
         throw new apierror(400,"comment is missing");
     }
-    if(!isValidObjectId(CommentId)){
-        throw new apierror(400,"comment is missing");
+    console.log(commentId);
+    if(!isValidObjectId(commentId)){
+        throw new apierror(400,"comment is invalid");
     }
-    const comment=await Comment.findById(CommentId);
+    const comment=await Comment.findById(commentId);
     if(!comment){
         throw new apierror(404,"comment is invalid");
     }
@@ -55,11 +56,11 @@ const updateComment=asyncHandler(async(req,res)=>{
 //delete comment
 const deleteComment=asyncHandler(async(req,res)=>{
     const {commentId}=req.params;
-    if(!isValidObjectId(CommentId)){
+    if(!isValidObjectId(commentId)){
         throw new apierror(400,"comment is missing");
     }
 
-    const comment=await Comment.findById(CommentId);
+    const comment=await Comment.findById(commentId);
     if(!comment){
         throw new apierror(404,"comment is invalid");
     }
@@ -73,9 +74,9 @@ const deleteComment=asyncHandler(async(req,res)=>{
 
     // 3. If not found → either not exist OR not owner
     if (!deletedComment) {
-        throw new apiError(404, "Comment not found or unauthorized");
+        throw new apierror(404, "Comment not found or unauthorized");
     }
-    return res.status(200).json(new apiresponse(200,deleteComment,"comment deleted"));
+    return res.status(200).json(new apiresponse(200,deletedComment,"comment deleted"));
     
 })
 
@@ -86,7 +87,7 @@ const deleteComment=asyncHandler(async(req,res)=>{
 const getComment=asyncHandler(async(req,res)=>{
     const { videoId } = req.params;
     const { page = 1, limit = 10 } = req.query;
-     const Page=parseInt(page);
+    const Page=parseInt(page);
     const Limit=parseInt(limit);
     if(!isValidObjectId(videoId)){
         throw new apierror(400,"videoid is missing");
@@ -95,7 +96,7 @@ const getComment=asyncHandler(async(req,res)=>{
     if(!userId||!isValidObjectId(userId)){
         throw new apierror(400,"userid is not valid")
     }
-    const getallComment=await Comment.aggregate([
+    const getallComment= Comment.aggregate([
         {
             $match:{
                 video:new mongoose.Types.ObjectId(videoId)
@@ -119,7 +120,7 @@ const getComment=asyncHandler(async(req,res)=>{
             $project:{
 
                 content:1,
-                createdAtL1,
+                createdAt:1,
                 "commentor_details.username":1,
                 "commentor_details.avtar":1,
                 "commentor_details.Fullname":1,
@@ -128,15 +129,15 @@ const getComment=asyncHandler(async(req,res)=>{
             }
         }
     ])
-    if(!getallComment){
+    if(getallComment.length===0){
         throw new apierror(404,"comment not found");
     }
-    const fetchedComment=Comment.aggregatePaginate(getallComment,{
-        page:Page,
-        limit:Limit
-    })
+     const fetchedcomment=await Comment.aggregatePaginate(getallComment,{
+            page:Page,
+            limit:Limit,
+        })
     return res.status(200).json(
-        new apiresponse(200,fetchedComment,"comment fetched successfully")
+        new apiresponse(200,fetchedcomment,"comment fetched successfully")
     );
 
 

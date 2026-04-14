@@ -91,12 +91,19 @@ const getUserTweets=asyncHandler(async(req,res)=>{
         },
         {
             $project:{
-                _id:0,
+                _id:"$tweets._id",
                 content:"$tweets.content",
                 createdAt:"$tweets.createdAt"
             }
         },
         { $sort:{createdAt:-1} },
     ])
+    if(tweets.length===0){
+        throw new apierror(404,"no tweets found")
+    }
+    return res.status(200).json(
+        new apiresponse(200,tweets,"tweets fetched successfully")
+    );
+
 });
 export {createTweet,updateTweet,deleteTweet,getUserTweets};
